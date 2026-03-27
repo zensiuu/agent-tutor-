@@ -1,4 +1,14 @@
-export const BAC_SUBJECTS = {
+// Subject IDs type for type safety
+export type SubjectId = 'algorithms' | 'databases' | 'tic' | 'mathematics' | 'physics'
+
+export interface SubjectDefinition {
+  id: SubjectId
+  name: string
+  nameAr: string
+  topics: string[]
+}
+
+export const BAC_SUBJECTS: Record<SubjectId, SubjectDefinition> = {
   algorithms: {
     id: 'algorithms',
     name: 'Algorithmes et Programmation',
@@ -35,7 +45,7 @@ export const BAC_SUBJECTS = {
       'Réseaux informatiques',
       'Internet et Web',
       'Sécurité informatique',
-      'Legislations et éthique du numérique',
+      'Législations et éthique du numérique',
       'Algorithmique appliquée aux TIC',
     ],
   },
@@ -68,24 +78,38 @@ export const BAC_SUBJECTS = {
   },
 }
 
-export const SYSTEM_PROMPT = `Tu es un tuteur IA pour les étudiants tunisiens préparant le Baccalauréat (section Info/Math).
+// Get all subject IDs
+export const SUBJECT_IDS: SubjectId[] = Object.keys(BAC_SUBJECTS) as SubjectId[]
+
+// Check if a subject ID is valid
+export function isValidSubjectId(id: string): id is SubjectId {
+  return SUBJECT_IDS.includes(id as SubjectId)
+}
+
+// SYSTEM_PROMPT - Can be overridden via environment variable
+export const SYSTEM_PROMPT = process.env.SYSTEM_PROMPT || `Tu es un tuteur IA pour les étudiants tunisiens préparant le Baccalauréat (section Info/Math).
 
 Tu peux répondre en français ou en arabe (التونسية/العربية).
 
 Tes matières:
 - Algorithmes et Programmation
 - Bases de Données
-- TIC (Technologies de l'Information et Communication)
+- TIC (Technologies de l'Information et de la Communication)
 - Mathématiques
 - Physique
 
-Règles:
-1. Explique clairement avec des exemples concrets
-2. Utilise des schémas si nécessaire (tu peux dessiner avec du texte)
-3. Donne des exercices corrigés
-4. Sois patient et encourageant
-5. Si tu ne sais pas quelque chose, dis-le honnêtement
-6. Tu peux utiliser des outils pour chercher des informations supplémentaires
+Directives de réponse:
+1. Explique clairement avec des exemples concrets et des schémas si nécessaire
+2. Donne des exercices corrigés pour pratiquer
+3. Sois patient, encourageant et adaptatif au niveau de l'élève
+4. Si tu ne sais pas quelque chose, dis-le honnêtement et propose de rechercher
+5. Tu peux utiliser des outils pour chercher des informations supplémentaires
+6. Structure tes réponses avec des titres, des listes et du code formaté quand pertinent
+
+Limites de sécurité:
+- Ne donne pas les réponses complètes aux examens
+- Ne partage pas d'informations personnelles
+- Reste focus sur les matières du Baccalauréat tunisien
 
 متخصص في مساعدة الطلاب التونسيين للتحضير للبكالوريا
 `
