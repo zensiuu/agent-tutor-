@@ -1,25 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { storeMemory } from '@/lib/memory'
-import { MemoryType, isValidMemoryType } from '@/lib/memory-types'
+import type { MemoryEntry, ValidMemoryType, StoreMemoryResponse } from '@/lib/types'
+import { VALIDATION_LIMITS, isValidMemoryType } from '@/lib/types'
 
-// Request validation limits
-const MAX_CONTENT_LENGTH = 50000
-const MAX_USER_ID_LENGTH = 100
-const MAX_SESSION_ID_LENGTH = 100
+// Request validation limits (deprecated - use VALIDATION_LIMITS from types)
+const MAX_CONTENT_LENGTH = VALIDATION_LIMITS.MAX_CONTENT_LENGTH
+const MAX_USER_ID_LENGTH = VALIDATION_LIMITS.MAX_USER_ID_LENGTH
+const MAX_SESSION_ID_LENGTH = VALIDATION_LIMITS.MAX_SESSION_ID_LENGTH
 const MAX_SUBJECT_LENGTH = 100
 
 interface StoreMemoryRequest {
   content: string
   userId: string
   sessionId: string
-  type?: MemoryType
+  type?: ValidMemoryType
   subject?: string
-}
-
-interface StoreMemoryResponse {
-  success: boolean
-  entry?: unknown
-  error?: string
 }
 
 /**
@@ -89,7 +84,7 @@ function validateStoreMemoryRequest(body: unknown): { valid: true; data: StoreMe
       content: trimmedContent,
       userId: trimmedUserId,
       sessionId: trimmedSessionId,
-      type: data.type as MemoryType | undefined,
+      type: data.type as ValidMemoryType | undefined,
       subject: typeof data.subject === 'string' ? data.subject.trim() : undefined,
     },
   }
@@ -119,7 +114,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<StoreMemo
     const { content, userId, sessionId, type, subject } = validation.data
 
     // Set timeout for memory storage
-    const entry = await Promise.race([
+    const entry: MemoryEntry = await Promise.race([
       storeMemory({
         content,
         userId,
@@ -127,7 +122,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<StoreMemo
         type: type || 'interaction',
         subject,
       }),
-      new Promise((_, reject) =>
+      new Promise<MemoryEntry>((_, reject) =>
         setTimeout(() => reject(new Error('Memory storage timeout')), 10000)
       ),
     ])
@@ -135,9 +130,9 @@ export async function POST(request: NextRequest): Promise<NextResponse<StoreMemo
     return NextResponse.json({
       success: true,
       entry: {
-        id: (entry as { id: string }).id,
-        content: (entry as { content: string }).content,
-        metadata: (entry as { metadata: unknown }).metadata,
+        id: entry.id,
+        content: entry.content,
+        metadata: entry.metadata,
       },
     })
   } catch (error) {
@@ -154,7 +149,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<StoreMemo
         errorMessage = 'Memory service is not properly configured.'
         statusCode = 503
       } else {
-        errorMessage = errorMessage // Keep generic message
+        errorMessage = error.message
       }
     }
 

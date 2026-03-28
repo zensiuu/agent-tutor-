@@ -1,32 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
+import type { VoiceRequest } from '@/lib/types'
+import { TIMEOUT_MS, ALLOWED_AUDIO_TYPES } from '@/lib/types'
 
 // Configuration constants
 const DEEPGRAM_API_URL = process.env.DEEPGRAM_API_URL || 'https://api.deepgram.com/v1/listen'
-const DEFAULT_TIMEOUT_MS = 30000 // 30 seconds
+const DEFAULT_TIMEOUT_MS = TIMEOUT_MS.VOICE
 const MAX_AUDIO_SIZE_MB = 10
 const MAX_AUDIO_SIZE_BYTES = MAX_AUDIO_SIZE_MB * 1024 * 1024
 
-// Allowed audio MIME types
-const ALLOWED_AUDIO_TYPES = [
-  'audio/webm',
-  'audio/wav',
-  'audio/mp3',
-  'audio/mpeg',
-  'audio/ogg',
-  'audio/m4a',
-  'audio/flac',
-  'audio/aac',
-]
-
-interface VoiceRequest {
+interface VoiceResponse {
   transcript?: string
   error?: string
+  confidence?: number
 }
 
 /**
  * Validates the audio blob
  */
-function validateAudio(audio: Blob | null, formData: FormData): { valid: true } | { valid: false; error: string } {
+function validateAudio(audio: Blob | null, _formData: FormData): { valid: true } | { valid: false; error: string } {
   if (!audio) {
     return { valid: false, error: 'No audio file provided' }
   }
@@ -42,14 +33,14 @@ function validateAudio(audio: Blob | null, formData: FormData): { valid: true } 
 
   // Check MIME type if available
   const mimeType = audio.type
-  if (mimeType && !ALLOWED_AUDIO_TYPES.includes(mimeType)) {
+  if (mimeType && !ALLOWED_AUDIO_TYPES.includes(mimeType as typeof ALLOWED_AUDIO_TYPES[number])) {
     return { valid: false, error: `Unsupported audio format: ${mimeType}. Allowed formats: ${ALLOWED_AUDIO_TYPES.join(', ')}` }
   }
 
   return { valid: true }
 }
 
-export async function POST(request: NextRequest): Promise<NextResponse<VoiceRequest>> {
+export async function POST(request: NextRequest): Promise<NextResponse<VoiceResponse>> {
   try {
     const formData = await request.formData()
     const audio = formData.get('audio') as Blob | null
@@ -89,7 +80,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<VoiceRequ
         method: 'POST',
         headers: {
           'Authorization': `Token ${apiKey}`,
-          'Content-Type': 'audio/webm', // Use a standard format for Deepgram
+          'Content-Type': 'audio/webm',
         },
         body: audioBuffer,
         signal: controller.signal,
@@ -110,8 +101,12 @@ export async function POST(request: NextRequest): Promise<NextResponse<VoiceRequ
 
       // Safely extract transcript from Deepgram response structure
       const transcript = data?.results?.channels?.[0]?.alternatives?.[0]?.transcript ?? ''
+      const confidence = data?.results?.channels?.[0]?.alternatives?.[0]?.confidence
 
-      return NextResponse.json({ transcript: transcript.trim() })
+      return NextResponse.json({ 
+        transcript: transcript.trim(),
+        confidence,
+      })
     } catch (fetchError) {
       clearTimeout(timeoutId)
 

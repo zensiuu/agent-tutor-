@@ -1,12 +1,11 @@
-// Subject IDs type for type safety
-export type SubjectId = 'algorithms' | 'databases' | 'tic' | 'mathematics' | 'physics'
+/**
+ * Subjects Module
+ * Contains Baccalaureate subject definitions and the system prompt for the AI tutor
+ */
 
-export interface SubjectDefinition {
-  id: SubjectId
-  name: string
-  nameAr: string
-  topics: string[]
-}
+import type { SubjectId, SubjectDefinition } from './types'
+
+export { type SubjectId, type SubjectDefinition } from './types'
 
 export const BAC_SUBJECTS: Record<SubjectId, SubjectDefinition> = {
   algorithms: {
@@ -80,11 +79,6 @@ export const BAC_SUBJECTS: Record<SubjectId, SubjectDefinition> = {
 
 // Get all subject IDs
 export const SUBJECT_IDS: SubjectId[] = Object.keys(BAC_SUBJECTS) as SubjectId[]
-
-// Check if a subject ID is valid
-export function isValidSubjectId(id: string): id is SubjectId {
-  return SUBJECT_IDS.includes(id as SubjectId)
-}
 
 // SYSTEM_PROMPT - Can be overridden via environment variable
 export const SYSTEM_PROMPT = process.env.SYSTEM_PROMPT || `Tu es un tuteur IA pour les étudiants tunisiens préparant le Baccalauréat (section Info/Math).

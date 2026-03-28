@@ -1,25 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { searchMemory } from '@/lib/memory'
+import type { SanitizedMemoryEntry, SearchMemoryResponse } from '@/lib/types'
+import { VALIDATION_LIMITS } from '@/lib/types'
 
-// Request validation limits
-const MAX_QUERY_LENGTH = 5000
-const MAX_USER_ID_LENGTH = 100
-const MAX_SESSION_ID_LENGTH = 100
-const MAX_LIMIT = 100
-const DEFAULT_LIMIT = 5
-const REQUEST_TIMEOUT_MS = 15000 // 15 seconds
+const MAX_QUERY_LENGTH = VALIDATION_LIMITS.MAX_QUERY_LENGTH
+const MAX_USER_ID_LENGTH = VALIDATION_LIMITS.MAX_USER_ID_LENGTH
+const MAX_SESSION_ID_LENGTH = VALIDATION_LIMITS.MAX_SESSION_ID_LENGTH
+const MAX_LIMIT = VALIDATION_LIMITS.MAX_LIMIT
+const DEFAULT_LIMIT = VALIDATION_LIMITS.DEFAULT_LIMIT
+const REQUEST_TIMEOUT_MS = 15000
 
 interface SearchMemoryRequest {
   query: string
   userId: string
   sessionId?: string
-  limit?: number
-}
-
-interface SearchMemoryResponse {
-  memories: unknown[]
-  error?: string
-  query?: string
+  limit: number
 }
 
 /**
@@ -125,7 +120,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<SearchMem
       clearTimeout(timeoutId)
 
       // Sanitize memories before returning
-      const sanitizedMemories = memories.map(m => ({
+      const sanitizedMemories: SanitizedMemoryEntry[] = memories.map(m => ({
         id: m.id,
         content: m.content,
         metadata: {
@@ -163,7 +158,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<SearchMem
         errorMessage = 'Memory service is not properly configured.'
         statusCode = 503
       } else {
-        errorMessage = errorMessage // Keep generic message
+        errorMessage = errorMessage
       }
     }
 

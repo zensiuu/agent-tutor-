@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSessionMemory } from '@/lib/memory'
+import type { SanitizedMemoryEntry } from '@/lib/types'
+import { VALIDATION_LIMITS } from '@/lib/types'
 
-// Request validation limits
-const MAX_SESSION_ID_LENGTH = 100
-const MAX_USER_ID_LENGTH = 100
-const REQUEST_TIMEOUT_MS = 15000 // 15 seconds
+const MAX_SESSION_ID_LENGTH = VALIDATION_LIMITS.MAX_SESSION_ID_LENGTH
+const MAX_USER_ID_LENGTH = VALIDATION_LIMITS.MAX_USER_ID_LENGTH
+const REQUEST_TIMEOUT_MS = 15000
 
 interface GetSessionMemoryRequest {
   sessionId: string
@@ -12,7 +13,7 @@ interface GetSessionMemoryRequest {
 }
 
 interface GetSessionMemoryResponse {
-  memories: unknown[]
+  memories: SanitizedMemoryEntry[]
   error?: string
   sessionId?: string
 }
@@ -90,7 +91,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<GetSessio
       clearTimeout(timeoutId)
 
       // Sanitize memories before returning
-      const sanitizedMemories = memories.map(m => ({
+      const sanitizedMemories: SanitizedMemoryEntry[] = memories.map(m => ({
         id: m.id,
         content: m.content,
         metadata: {
@@ -128,7 +129,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<GetSessio
         errorMessage = 'Memory service is not properly configured.'
         statusCode = 503
       } else {
-        errorMessage = errorMessage // Keep generic message
+        errorMessage = errorMessage
       }
     }
 
