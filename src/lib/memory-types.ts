@@ -1,7 +1,7 @@
 /**
  * Memory Types Module
  * Re-exports from centralized types for backwards compatibility
- * New code should import from @/lib/types directly
+ * New code should import from @/types/types directly
  */
 
 // Re-export all memory-related types
@@ -16,13 +16,13 @@ export type {
   StoreMemoryResponse,
   SearchMemoryResponse,
   SanitizedMemoryEntry,
-} from './types'
+} from '../types/types'
 
 // Re-export constants and validators
-export { VALID_MEMORY_TYPES } from './types'
-export { isValidMemoryType } from './types'
+export { VALID_MEMORY_TYPES } from '../types/types'
+export { isValidMemoryType } from '../types/types'
 
 /**
- * @deprecated Import ValidMemoryType from '@/lib/types' instead
+ * @deprecated Import ValidMemoryType from '@/types/types' instead
  */
 export type LegacyMemoryType = 'interaction' | 'note' | 'topic' | 'question'

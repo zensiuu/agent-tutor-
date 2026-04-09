@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { searchMemory } from '@/lib/memory'
-import type { SanitizedMemoryEntry, SearchMemoryResponse } from '@/lib/types'
-import { VALIDATION_LIMITS } from '@/lib/types'
+import type { SanitizedMemoryEntry, SearchMemoryResponse } from '@/types/types'
+import { VALIDATION_LIMITS } from '@/types/types'
 
 const MAX_QUERY_LENGTH = VALIDATION_LIMITS.MAX_QUERY_LENGTH
 const MAX_USER_ID_LENGTH = VALIDATION_LIMITS.MAX_USER_ID_LENGTH

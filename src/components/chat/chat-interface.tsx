@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
-import type { Message, ChatMessage } from '@/lib/types'
+import type { Message, ChatMessage } from '@/types/types'
+import type { SubjectId } from '@/lib/subjects'
 
 // =============================================================================
 // Session & User ID Management
@@ -25,6 +26,11 @@ function getUserId(): string {
 // Initial Welcome Message
 // =============================================================================
 
+interface ChatInterfaceProps {
+  subjectId?: SubjectId | null
+  topic?: string | null
+}
+
 const WELCOME_MESSAGE: Message = {
   id: 'welcome',
   role: 'assistant',
@@ -33,10 +39,22 @@ const WELCOME_MESSAGE: Message = {
 }
 
 // =============================================================================
+// Subject-specific Welcome Messages
+// =============================================================================
+
+const SUBJECT_WELCOME: Record<SubjectId, string> = {
+  algorithms: 'مرحبا! أنا متخصص في算法 والخوارزميات 🇹🇳\n\nBonjour! Je suis votre expert en Algorithmes et Programmation.\n\nPosez-moi vos questions sur les algorithmes, la programmation, ou les structures de données!',
+  databases: 'مرحبا! أنا متخصص في قواعد البيانات 🇹🇳\n\nBonjour! Je suis votre expert en Bases de Données.\n\nPosez-moi vos questions sur SQL, le modèle relationnel, ou la conception de bases de données!',
+  tic: 'مرحبا! أنا متخصص في تقنيات المعلومات والاتصال 🇹🇳\n\nBonjour! Je suis votre expert en TIC.\n\nPosez-moi vos questions sur les réseaux, la sécurité, ou le web!',
+  mathematics: 'مرحبا! أنا متخصص في الرياضيات 🇹🇳\n\nBonjour! Je suis votre expert en Mathématiques.\n\nPosez-moi vos questions sur les nombres complexes, les matrices, ou les probabilités!',
+  physics: 'مرحبا! أنا متخصص في الفيزياء 🇹🇳\n\nBonjour! Je suis votre expert en Physique.\n\nPosez-moi vos questions sur la mécanique, l\'électricité, ou l\'optique!',
+}
+
+// =============================================================================
 // Chat Interface Component
 // =============================================================================
 
-export function ChatInterface() {
+export function ChatInterface({ subjectId, topic }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>([WELCOME_MESSAGE])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -46,6 +64,23 @@ export function ChatInterface() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
+
+  // Reset messages when subject changes
+  useEffect(() => {
+    if (subjectId && SUBJECT_WELCOME[subjectId]) {
+      const welcomeMsg: Message = {
+        id: `welcome_${subjectId}`,
+        role: 'assistant',
+        content: topic 
+          ? `${SUBJECT_WELCOME[subjectId]}\n\nSujet sélectionné: ${topic}`
+          : SUBJECT_WELCOME[subjectId],
+        timestamp: new Date(),
+      }
+      setMessages([welcomeMsg])
+    } else {
+      setMessages([WELCOME_MESSAGE])
+    }
+  }, [subjectId, topic])
 
   // Scroll to bottom when messages change
   const scrollToBottom = useCallback(() => {
@@ -99,6 +134,8 @@ export function ChatInterface() {
           history: historyForApi,
           userId: getUserId(),
           sessionId,
+          subjectId: subjectId || undefined,
+          topic: topic || undefined,
         }),
         signal: abortControllerRef.current.signal,
       })
@@ -118,7 +155,7 @@ export function ChatInterface() {
     } finally {
       setIsLoading(false)
     }
-  }, [messages, sessionId])
+  }, [messages, sessionId, subjectId, topic])
 
   /**
    * Handles sending a message
@@ -203,7 +240,7 @@ export function ChatInterface() {
         <div
           className={`max-w-[80%] rounded-2xl px-4 py-3 ${
             message.role === 'user'
-              ? 'bg-indigo-600 text-white'
+              ? 'bg-[#0D9373] text-white'
               : message.role === 'system'
               ? 'bg-slate-700 text-slate-300 text-sm italic'
               : 'bg-slate-800 text-slate-100'
@@ -273,7 +310,7 @@ export function ChatInterface() {
             placeholder="Posez votre question... / اكتب سؤالك هنا..."
             aria-label="Zone de texte pour poser une question"
             disabled={isLoading}
-            className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200"
+            className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#0D9373] focus:border-transparent disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200"
           />
           
           {isLoading ? (
@@ -291,7 +328,7 @@ export function ChatInterface() {
               onClick={handleSend}
               disabled={!input.trim()}
               aria-label="Envoyer le message"
-              className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-slate-900"
+              className="bg-[#0D9373] hover:bg-[#059669] disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-[#0D9373] focus:ring-offset-2 focus:ring-offset-slate-900"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />

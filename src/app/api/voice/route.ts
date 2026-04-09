@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import type { VoiceRequest } from '@/lib/types'
-import { TIMEOUT_MS, ALLOWED_AUDIO_TYPES } from '@/lib/types'
+import type { VoiceRequest } from '@/types/types'
+import { TIMEOUT_MS, ALLOWED_AUDIO_TYPES } from '@/types/types'
 
 // Configuration constants
 const DEEPGRAM_API_URL = process.env.DEEPGRAM_API_URL || 'https://api.deepgram.com/v1/listen'

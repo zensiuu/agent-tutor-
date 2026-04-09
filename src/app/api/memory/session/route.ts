@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSessionMemory } from '@/lib/memory'
-import type { SanitizedMemoryEntry } from '@/lib/types'
-import { VALIDATION_LIMITS } from '@/lib/types'
+import type { SanitizedMemoryEntry } from '@/types/types'
+import { VALIDATION_LIMITS } from '@/types/types'
 
 const MAX_SESSION_ID_LENGTH = VALIDATION_LIMITS.MAX_SESSION_ID_LENGTH
 const MAX_USER_ID_LENGTH = VALIDATION_LIMITS.MAX_USER_ID_LENGTH

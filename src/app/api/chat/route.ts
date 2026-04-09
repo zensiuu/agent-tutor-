@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { generateResponse } from '@/lib/brain'
 import { searchMemory, storeMemory, buildContextPrompt } from '@/lib/memory'
-import type { ChatMessage, ValidMemoryType } from '@/lib/types'
+import type { ChatMessage, ValidMemoryType } from '@/types/types'
 
 interface ChatRequestBody {
   message: string

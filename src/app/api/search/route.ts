@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { searchWeb, deepSearch } from '@/lib/search'
-import type { SearchRequest, SearchResponse } from '@/lib/types'
+import type { SearchRequest, SearchResponse } from '@/types/types'
 
 interface ExtendedSearchRequest extends SearchRequest {
   deepSearch?: boolean

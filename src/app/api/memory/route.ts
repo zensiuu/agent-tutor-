@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { storeMemory } from '@/lib/memory'
-import type { MemoryEntry, ValidMemoryType, StoreMemoryResponse } from '@/lib/types'
-import { VALIDATION_LIMITS, isValidMemoryType } from '@/lib/types'
+import type { MemoryEntry, ValidMemoryType, StoreMemoryResponse } from '@/types/types'
+import { VALIDATION_LIMITS, isValidMemoryType } from '@/types/types'
 
 // Request validation limits (deprecated - use VALIDATION_LIMITS from types)
 const MAX_CONTENT_LENGTH = VALIDATION_LIMITS.MAX_CONTENT_LENGTH
